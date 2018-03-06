@@ -8,4 +8,6 @@ ssh-keygen
 cat /root/.ssh/id_rsa.pub
 # 克隆远程仓库到本地
 git clone git@github.com:coldly/Operations.git
+# 第一次提交
+git push -u origin master
 
