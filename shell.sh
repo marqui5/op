@@ -1,3 +1,8 @@
+# 查看版本信息
+uname -a
+cat /proc/version
+lsb_release -a
+ls /boot
 # 统计cpu占用前十的进程
 ps aux | sort -k3 | head -10
 # 将/opt目录下包含'hello'的文件替换成'hi'
