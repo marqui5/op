@@ -1,4 +1,3 @@
-#!/bin/bash
 # 编写shell脚本循环创建100个用户（user_[0-99])
 #!/bin/bash
 for((i = 0; i < 100; i++));
@@ -7,6 +6,11 @@ useradd user_$i;
 done
 # 统计shell.sh文件的行数
 wc -l shell.sh
+# 查看版本信息
+uname -a
+cat /proc/version
+lsb_release -a
+ls /boot
 # 统计cpu占用前十的进程
 ps aux | sort -k3 | head -10
 # 开机启动mysql
