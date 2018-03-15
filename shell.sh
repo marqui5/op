@@ -97,3 +97,8 @@ git commit -m "second commit"
 git push -u origin master
 # 后续提交远程仓库
 git push origin
+# 回退到上个版本
+git reset --hard HEAD^
+# 查询commit id
+git reflog
+# 解决冲突直接修改文件
