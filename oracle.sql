@@ -18,6 +18,11 @@ conn sys/password as sysdba
 conn user/password
 conn user/password@instance
 
+set linesize 500
+set pagesize 800
+--查询薪水排名前五的雇员
+select * from (select * from emp order by sal desc) where rownum < 6;
+
 --安装Oracle 12.2.0.1
 --Centos7 minimal x86_64 cpu:4c memory:4G disk:30G swap:4G 
 vi /etc/sysconfig/network-scripts/ifcfg-ens33
