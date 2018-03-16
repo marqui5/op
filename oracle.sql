@@ -484,3 +484,121 @@ LISTENER =
       (SID_NAME = odb)
     )
   )
+
+--使用scott用户
+sqlplus sys/password as sysdba
+--查询所有用户没有scott和sh
+select username from dba_users;
+--查看当前容器
+show con_name;
+CON_NAME
+CDB$ROOT
+--查看可插入数据库PDB的状态
+select con_id, dbid, guid, name, open_mode from v$pdbs;
+CON_ID DBID	  GUID				   NAME		OPEN_MODE
+2      231555106  6771BF9004CE55A1E053887B10AC7F52 PDB$SEED	READ ONLY
+3      4195839754 6771EC20BCBB5D3BE053887B10AC01BE CDB1PDB	MOUNTED
+--将CDB切换到PDB
+alter session set container=cdb1pdb;
+show con_name;
+CON_NAME
+CDB1PDB
+--打开cdb1pdb可插入数据库,此类语法只能在PDB容器下运行
+alter database cdb1pdb open;
+Database altered.
+--在CDB下运行
+alter pluggable database cdb1pdb open;
+--查看scott与sh用户是否存在
+SELECT username FROM dba_users WHERE username='SCOTT' OR username='SH';
+no rows selected
+--切换回CDB容器
+ALTER SESSION SET CONTAINER=CDB$ROOT;
+--关闭所有PDB
+ALTER PLUGGABLE DATABASE ALL CLOSE;
+--创建c##scott用户
+sqlplus / as sysdba
+CREATE USER c##scott IDENTIFIED BY tiger;
+--为用户授权
+GRANT CONNECT,RESOURCE,UNLIMITED TABLESPACE TO c##scott CONTAINER=ALL;
+--设置用户使用的表空间
+ALTER USER c##scott DEFAULT TABLESPACE USERS;
+ALTER USER c##scott TEMPORARY TABLESPACE TEMP;
+--使用c##scott用户登录
+CONNECT c##scott/tiger
+--删除数据表
+DROP TABLE emp PURGE;
+DROP TABLE dept PURGE;
+DROP TABLE bonus PURGE;
+DROP TABLE salgrade PURGE;
+--创建数据表
+CREATE TABLE dept(
+deptno NUMBER(2) CONSTRAINT PK_DEPT PRIMARY KEY,
+dname VARCHAR2(14),
+loc VARCHAR2(13));
+CREATE TABLE emp(
+empno NUMBER(4) CONSTRAINT PK_EMP PRIMARY KEY,
+ename VARCHAR2(10),
+job VARCHAR2(9),
+mgr NUMBER(4),
+hiredate DATE,
+sal NUMBER(7,2),
+comm NUMBER(7,2),
+deptno NUMBER(2) CONSTRAINT FK_DEPTNO REFERENCES DEPT);
+CREATE TABLE bonus(
+enamE VARCHAR2(10),
+job VARCHAR2(9),
+sal NUMBER,
+comm NUMBER);
+CREATE TABLE salgrade(
+grade NUMBER,
+losal NUMBER,
+hisal NUMBER);
+--插入测试数据dept
+INSERT INTO dept VALUES (10, 'ACCOUNTING', 'NEW YORK');
+INSERT INTO dept VALUES (20, 'RESEARCH', 'DALLAS');
+INSERT INTO dept VALUES (30, 'SALES', 'CHICAGO');
+INSERT INTO dept VALUES (40, 'OPERATIONS', 'BOSTON');
+--插入测试数据emp
+INSERT INTO emp VALUES (7369, 'SMITH' , 'CLERK' ,7902,to_date
+( '17-12-1980' , 'dd-mm-yyyy' ),800, NULL ,20);
+INSERT INTO emp VALUES (7499, 'ALLEN' , 'SALESMAN' ,7698,to_date
+( '20-2-1981' , 'dd-mm-yyyy' ),1600,300,30);
+INSERT INTO emp VALUES (7521, 'WARD' , 'SALESMAN' ,7698,to_date
+( '22-2-1981' , 'dd-mm-yyyy' ),1250,500,30);
+INSERT INTO emp VALUES (7566, 'JONES' , 'MANAGER' ,7839,to_date
+( '2-4-1981' , 'dd-mm-yyyy' ),2975, NULL ,20);
+INSERT INTO emp VALUES (7654, 'MARTIN' , 'SALESMAN' ,7698,to_date
+( '28-9-1981' , 'dd-mm-yyyy' ),1250,1400,30);
+INSERT INTO emp VALUES (7698, 'BLAKE' , 'MANAGER' ,7839,to_date
+( '1-5-1981' , 'dd-mm-yyyy' ),2850, NULL ,30);
+INSERT INTO emp VALUES (7782, 'CLARK' , 'MANAGER' ,7839,to_date
+( '9-6-1981' , 'dd-mm-yyyy' ),2450, NULL ,10);
+INSERT INTO emp VALUES (7788, 'SCOTT' , 'ANALYST' ,7566,to_date
+( '19-04-1987' , 'dd-mm-yyyy' )-85,3000, NULL ,20);
+INSERT INTO emp VALUES (7839, 'KING' , 'PRESIDENT' , NULL ,to_date
+( '17-11-1981' , 'dd-mm-yyyy' ),5000, NULL ,10);
+INSERT INTO emp VALUES (7844, 'TURNER' , 'SALESMAN' ,7698,to_date
+( '8-9-1981' , 'dd-mm-yyyy' ),1500,0,30);
+INSERT INTO emp VALUES (7876, 'ADAMS' , 'CLERK' ,7788,to_date
+( '23-05-1987' , 'dd-mm-yyyy' )-51,1100, NULL ,20);
+INSERT INTO emp VALUES (7900, 'JAMES' , 'CLERK' ,7698,to_date
+( '3-12-1981' , 'dd-mm-yyyy' ),950, NULL ,30);
+INSERT INTO emp VALUES (7902, 'FORD' , 'ANALYST' ,7566,to_date
+( '3-12-1981' , 'dd-mm-yyyy' ),3000, NULL ,20);
+INSERT INTO emp VALUES (7934, 'MILLER' , 'CLERK' ,7782,to_date
+( '23-1-1982' , 'dd-mm-yyyy' ),1300, NULL ,10);
+--插入测试数据salgrade
+INSERT INTO salgrade VALUES (1,700,1200);
+INSERT INTO salgrade VALUES (2,1201,1400);
+INSERT INTO salgrade VALUES (3,1401,2000);
+INSERT INTO salgrade VALUES (4,2001,3000);
+INSERT INTO salgrade VALUES (5,3001,9999);
+--事务提交
+COMMIT;
+--查看所有的表名
+select table_name from user_tables;
+--查询各表数据
+select * from dept;
+select * from emp;
+select * from bonus;
+select * from salgrade;
