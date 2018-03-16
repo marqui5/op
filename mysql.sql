@@ -27,7 +27,7 @@ insert into students (name, course, score) values ('ada', 'math', 86);
 --查询
 select * from students;
 --查询出每门课程的成绩都大于80的学生姓名
-select distinct name frome students where name not in (select name from students where score <= 80);
+select distinct name from students where name not in (select name from students where score <= 80);
 
 --配置主从复制
 --修改主服务器配置文件
@@ -53,5 +53,57 @@ GRANT REPLICATION SLAVE ON *.* TO 'root'@'172.16.123.131' IDENTIFIED BY 'admin';
 FLUSH TABLES WITH READ LOCK;
 --备份主库
 mysqldump -uroot -p --all-databases > /root/db.sql
+--解锁主库
+UNLOCK TABLES;
 --导入主库数据到从库
-
+mysql -uroot -p < db.sql
+--登录
+mysql -u root -padmin
+--设置主从复制
+change master to master_host='172.16.123.130',master_user='root',master_password='admin',master_log_file='master-bin.000002',master_log_pos= 245;
+--开启主从复制
+START SLAVE;
+--查看从库状态
+show slave status\G
+*************************** 1. row ***************************
+               Slave_IO_State: Waiting for master to send event
+                  Master_Host: 172.16.123.130
+                  Master_User: root
+                  Master_Port: 3306
+                Connect_Retry: 60
+              Master_Log_File: master-bin.000011
+          Read_Master_Log_Pos: 465
+               Relay_Log_File: relay-bin.000014
+                Relay_Log_Pos: 750
+        Relay_Master_Log_File: master-bin.000011
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB: 
+          Replicate_Ignore_DB: 
+           Replicate_Do_Table: 
+       Replicate_Ignore_Table: 
+      Replicate_Wild_Do_Table: 
+  Replicate_Wild_Ignore_Table: 
+                   Last_Errno: 0
+                   Last_Error: 
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 465
+              Relay_Log_Space: 1323
+              Until_Condition: None
+               Until_Log_File: 
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File: 
+           Master_SSL_CA_Path: 
+              Master_SSL_Cert: 
+            Master_SSL_Cipher: 
+               Master_SSL_Key: 
+        Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error: 
+               Last_SQL_Errno: 0
+               Last_SQL_Error: 
+  Replicate_Ignore_Server_Ids: 
+             Master_Server_Id: 130
+1 row in set (0.00 sec)
