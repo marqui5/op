@@ -602,3 +602,130 @@ select * from dept;
 select * from emp;
 select * from bonus;
 select * from salgrade;
+
+--数据库导出，导入，备份，迁移
+su - oracle
+--创建导出文件存放目录
+mkdir backup
+--system登录
+sqlplus /nolog
+conn system/password as sysdba
+--创建逻辑目录
+create directory dumpdir as '/home/oracle/backup';
+--查看管理理员目录
+select * from dba_directories;
+--给c##scott用户赋予在指定目录的操作权限
+grant read,write on directory dumpdir to c##scott;
+exit
+--导出表
+expdp c##scott/tiger DIRECTORY=dumpdir DUMPFILE=dept.dmp TABLES=dept LOGFILE=dept.log
+--导出方案（导出用户）
+expdp c##scott/tiger@odb schemas=c##scott dumpfile=scott.dmp DIRECTORY=dumpdir LOGFILE=scott.log
+--导出表空间
+expdp system/password DIRECTORY=dumpdir DUMPFILE=tablespace.dmp TABLESPACES=users,temp LOGFILE=tablespace.log
+--导出数据库
+expdp system/password DIRECTORY=dumpdir DUMPFILE=full.dmp FULL=y LOGFILE=full.log
+--登录
+sqlplus c##scott/tiger
+--查表
+select table_name from user_tables;
+--删除表
+drop table salgrade purge;
+--导入表
+impdp c##scott/tiger directory=dumpdir dumpfile=dept.dmp tables=c##scott.dept logfile=imp_dept.log
+--从全库备份中导入表
+impdp c##scott/tiger directory=dumpdir dumpfile=full.dmp tables=c##scott.salgrade logfile=imp_salgrade.log
+--导入方案（导入用户）
+impdp c##scott/tiger DIRECTORY=dumpdir DUMPFILE=scott.dmp SCHEMAS=c##scott logfile=imp_scott.log
+--导入表空间
+impdp system/password DIRECTORY=dumpdir DUMPFILE=tablespace.dmp TABLESPACES=users logfile=imp_tbs.log
+--导入数据库
+impdp system/password DIRECTORY=dumpdir DUMPFILE=full.dmp FULL=y logfile=imp_full.log
+--创建用户
+create user c##tiger identified by scott;
+--为用户授权
+GRANT CONNECT,RESOURCE,UNLIMITED TABLESPACE TO c##tiger CONTAINER=ALL;
+--创建表空间
+create tablespace tiger datafile '/u01/app/oracle/oradata/cdb1/tiger01.dbf' size 10M extent management local uniform size 1M;
+--查看表空间的名称及大小
+SELECT t.tablespace_name, SUM(bytes / (1024 * 1024)) ts_size
+FROM dba_tablespaces t, dba_data_files d
+WHERE t.tablespace_name = d.tablespace_name
+GROUP BY t.tablespace_name;
+--查看表空间物理文件的名称及大小
+SELECT tablespace_name, file_id, file_name, bytes / (1024 * 1024) total_space
+FROM dba_data_files
+ORDER BY tablespace_name;
+--分配表空间
+ALTER USER c##tiger DEFAULT TABLESPACE TIGER;
+ALTER USER c##tiger TEMPORARY TABLESPACE TEMP;
+commit;
+--登录
+conn c##tiger/scott
+--查看表名
+select table_name from user_tables;
+--导入不同方案（导入不同用户）
+impdp system/password directory=dumpdir dumpfile=full.dmp tables=c##scott.salgrade remap_schema=c##scott:c##tiger logfile=imp_tiger_salgrade.log
+--导入不同用户不同表空间
+impdp system/password directory=dumpdir dumpfile=scott.dmp remap_tablespace=users:tiger remap_schema=c##scott:c##tiger logfile=imp_tiger.log
+
+--DBA登录
+sqlplus sys/password as sysdba
+--创建逻辑目录
+create directory dumpdir as '/home/oracle/backup';
+--给c##tiger用户赋予在指定目录的操作权限
+grant read,write on directory dumpdir to c##tiger;
+--导出方案
+expdp c##tiger/scott@odb schemas=c##tiger dumpfile=tiger.dmp DIRECTORY=dumpdir LOGFILE=tiger.log
+--删除用户及对象
+drop user c##tiger cascade;
+--删除表空间和内容
+drop tablespace tiger INCLUDING CONTENTS;
+--查看表空间文件
+select tablespace_name,file_name from dba_data_files;
+--创建用户
+create user c##tiger identified by scott;
+--为用户授权
+GRANT CONNECT,RESOURCE,UNLIMITED TABLESPACE TO c##tiger CONTAINER=ALL;
+--创建表空间，大小2M，自动扩容1M，最大无限制
+create tablespace tiger datafile '/u01/app/oracle/oradata/cdb1/tiger01.dbf' size 2M autoextend on next 1M maxsize unlimited;
+--查看表空间的名称及大小
+SELECT t.tablespace_name, SUM(bytes / (1024 * 1024)) ts_size
+FROM dba_tablespaces t, dba_data_files d
+WHERE t.tablespace_name = d.tablespace_name
+GROUP BY t.tablespace_name;
+--查看表空间物理文件的名称及大小
+SELECT tablespace_name, file_id, file_name, bytes / (1024 * 1024) total_space
+FROM dba_data_files
+ORDER BY tablespace_name;
+--查询表空间使用率 
+SELECT total.tablespace_name,  
+       Round(total.MB, 2)           AS Total_MB,  
+       Round(total.MB - free.MB, 2) AS Used_MB,  
+       Round(( 1 - free.MB / total.MB ) * 100, 2)  
+       || '%'                       AS Used_Pct  
+FROM   (SELECT tablespace_name,  
+               Sum(bytes) / 1024 / 1024 AS MB  
+        FROM   dba_free_space  
+        GROUP  BY tablespace_name) free,  
+       (SELECT tablespace_name,  
+               Sum(bytes) / 1024 / 1024 AS MB  
+        FROM   dba_data_files  
+        GROUP  BY tablespace_name) total  
+WHERE  free.tablespace_name = total.tablespace_name;
+--表空间扩容，改变数据文件的大小
+alter database datafile '/u01/app/oracle/oradata/cdb1/tiger01.dbf' resize 5M;
+--添加数据文件
+alter tablespace tiger add datafile '/u01/app/oracle/oradata/cdb1/tiger02.dbf' size 2M;
+--分配表空间
+ALTER USER c##tiger DEFAULT TABLESPACE TIGER;
+ALTER USER c##tiger TEMPORARY TABLESPACE TEMP;
+commit;
+--给c##tiger用户赋予在指定目录的操作权限
+grant read,write on directory dumpdir to c##tiger;
+--导入方案
+impdp c##tiger/scott DIRECTORY=dumpdir DUMPFILE=tiger.dmp SCHEMAS=c##tiger logfile=imp_tiger.log
+--登录
+conn c##tiger/scott
+--查看表名
+select table_name from user_tables;
