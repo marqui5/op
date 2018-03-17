@@ -28,7 +28,10 @@ insert into students (name, course, score) values ('ada', 'math', 86);
 select * from students;
 --查询出每门课程的成绩都大于80的学生姓名
 select distinct name from students where name not in (select name from students where score <= 80);
-
+--备份
+mysqldump -u root -ppasswd dbname >/home/dbname.sql     	 --备份库
+mysqldump -u root -ppasswd dbname tablename>/home/tablename.sql  --备份表
+mysqldump -u root -ppasswd --all-databases >/home/full.sql    	 --备份全库
 --配置主从复制
 --修改主服务器配置文件
 vim /etc/my.cnf
@@ -52,11 +55,17 @@ GRANT REPLICATION SLAVE ON *.* TO 'root'@'172.16.123.131' IDENTIFIED BY 'admin';
 --加锁
 FLUSH TABLES WITH READ LOCK;
 --备份主库
-mysqldump -uroot -p --all-databases > /root/db.sql
+mysqldump -uroot -ppasswd --all-databases > /root/db.sql
+--按库导出
+mysqldump -uroot -ppasswd database_name >database_name.sql
 --解锁主库
 UNLOCK TABLES;
 --导入主库数据到从库
 mysql -uroot -p < db.sql
+--按库导入
+create database database_name;
+use database_name;
+source database_name.sql;
 --登录
 mysql -u root -padmin
 --设置主从复制
