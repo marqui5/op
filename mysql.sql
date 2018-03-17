@@ -45,6 +45,10 @@ server-id=130
 innodb_file_per_table=NO
 server-id=131
 relay-log=/var/lib/mysql/relay-bin
+--如果设置log_slave_updates，slave可以是其它slave的master，从而扩散master的更新
+log-slave-updates=YES
+--按表复制
+replicate_wild_do_table=table_name.%
 --重启mariadb
 systemctl restart mariadb
 --登录主服务器
