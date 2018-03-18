@@ -13,10 +13,34 @@ lsb_release -a
 ls /boot
 # 统计cpu占用前十的进程
 ps aux | sort -k3 | head -10
+# 查看物理CPU个数
+cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
+# 查看每个物理CPU中core的个数(即核数)
+cat /proc/cpuinfo| grep "cpu cores"| uniq
+# 查看逻辑CPU的个数
+cat /proc/cpuinfo| grep "processor"| wc -l
+# 查看CPU型号
+cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
+# 查看内存条数
+dmidecode | grep -A16 "Memory Device$"
+# 内存使用情况
+free -h
+# 将所有正在内存中的缓冲区写到磁盘中
+sync
+# 释放页缓存
+echo 1 > /proc/sys/vm/drop_caches
+# 释放dentries和inodes
+echo 2 > /proc/sys/vm/drop_caches
+# 释放所有缓存
+echo 3 > /proc/sys/vm/drop_caches
+# 让操作系统重新分配内存
+echo 0 > /proc/sys/vm/drop_caches
 # 开机启动mysql
 chkconfig mysqld on
 # centos7
 systemctl enable mariadb
+# 查看磁盘空间
+df -h
 # 查看22端口现在运行的情况
 lsof -i :22
 COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
