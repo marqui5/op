@@ -120,3 +120,46 @@ Master_SSL_Verify_Server_Cert: No
   Replicate_Ignore_Server_Ids: 
              Master_Server_Id: 130
 1 row in set (0.00 sec)
+
+--解决mysql无法连接的问题
+ERROR 1524 (HY000): Plugin 'unix_socket' is not loaded
+--进入安全模式，并设置为后台进程
+/usr/bin/mysqld_safe --skip-grant-tables &
+--解决报错：mysqld_safe Directory '/var/run/mysqld' for UNIX socket file don't exists.
+mkdir -p /var/run/mysqld
+chown mysql:mysql /var/run/mysqld
+--进入安全模式，并设置为后台进程
+/usr/bin/mysqld_safe --skip-grant-tables &
+--root登录
+mysql -u root
+--查询用户
+select Host,User,plugin from mysql.user where User='root';
++-----------+------+-------------+
+| Host      | User | plugin      |
++-----------+------+-------------+
+| localhost | root | unix_socket |
++-----------+------+-------------+
+--重置加密模式
+update mysql.user set plugin='mysql_native_password' where User='root';
+--查询用户
+select Host,User,plugin from mysql.user where User='root';
++-----------+------+-----------------------+
+| Host      | User | plugin                |
++-----------+------+-----------------------+
+| localhost | root | mysql_native_password |
++-----------+------+-----------------------+
+--重置密码
+update mysql.user set password=PASSWORD("newpassword") where User='root';
+--刷新权限信息
+flush privileges;
+--退出
+exit
+--杀掉mysql进程
+kill -9 $(pgrep mysql)
+--重新启动mysql服务
+service mysql start
+--登陆mysql
+mysql -u root -p
+--安装unix_soket
+install plugin unix_socket soname 'auth_socket';
+--无法安装放弃unix_socket认证方式
