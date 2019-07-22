@@ -126,3 +126,44 @@ git reset --hard HEAD^
 # 查询commit id
 git reflog
 # 解决冲突直接修改文件
+
+# Docker
+cat /etc/debian_version 
+kali-rolling
+vi /etc/debian_version
+9.0
+
+cat /etc/lsb-release
+DISTRIB_ID=Kali
+DISTRIB_RELEASE=kali-rolling
+DISTRIB_CODENAME=kali-rolling
+DISTRIB_DESCRIPTION="Kali GNU/Linux Rolling"
+vi /etc/lsb-release
+DISTRIB_ID=Debian
+DISTRIB_RELEASE=9
+DISTRIB_CODENAME=stretch
+DISTRIB_DESCRIPTION="Debian GNU/Linux 9 (stretch)"
+
+cat /etc/os-release
+PRETTY_NAME="Kali GNU/Linux Rolling"
+NAME="Kali GNU/Linux"
+ID=kali
+VERSION="2019.1"
+VERSION_ID="2019.1"
+ID_LIKE=debian
+ANSI_COLOR="1;31"
+HOME_URL="https://www.kali.org/"
+SUPPORT_URL="https://forums.kali.org/"
+BUG_REPORT_URL="https://bugs.kali.org/"
+vi /etc/os-release
+PRETTY_NAME="Debian GNU/Linux 9 (stretch)"
+NAME="Debian GNU/Linux"
+ID=debian
+VERSION="9 (stretch)"
+VERSION_ID="9"
+ID_LIKE=debian
+ANSI_COLOR="1;31"
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+
