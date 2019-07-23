@@ -185,6 +185,8 @@ add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/debian \
    $(lsb_release -cs) \
    stable"
+cat /etc/apt/sources.list   
+deb-src [arch=amd64] https://download.docker.com/linux/debian stretch stable
 apt-get update
 apt-get install docker-ce docker-ce-cli containerd.io
 docker run hello-world
