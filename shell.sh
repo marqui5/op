@@ -190,3 +190,14 @@ deb-src [arch=amd64] https://download.docker.com/linux/debian stretch stable
 apt-get update
 apt-get install docker-ce docker-ce-cli containerd.io
 docker run hello-world
+
+AI
+# install tensorflow 1.5.0 
+# upper than this version have Illegal instruction error
+python3
+>>> import pip._internal
+>>> print(pip._internal.pep425tags.get_supported())
+[('cp37', 'cp37m', 'manylinux1_x86_64'), ('cp37', 'cp37m', 'linux_x86_64'), ('cp37', 'abi3', 'manylinux1_x86_64'), ('cp37', 'abi3', 'linux_x86_64'), ('cp37', 'none', 'manylinux1_x86_64'), ('cp37', 'none', 'linux_x86_64'), ('cp36', 'abi3', 'manylinux1_x86_64'), ('cp36', 'abi3', 'linux_x86_64'), ('cp35', 'abi3', 'manylinux1_x86_64'), ('cp35', 'abi3', 'linux_x86_64'), ('cp34', 'abi3', 'manylinux1_x86_64'), ('cp34', 'abi3', 'linux_x86_64'), ('cp33', 'abi3', 'manylinux1_x86_64'), ('cp33', 'abi3', 'linux_x86_64'), ('cp32', 'abi3', 'manylinux1_x86_64'), ('cp32', 'abi3', 'linux_x86_64'), ('py3', 'none', 'manylinux1_x86_64'), ('py3', 'none', 'linux_x86_64'), ('cp37', 'none', 'any'), ('cp3', 'none', 'any'), ('py37', 'none', 'any'), ('py3', 'none', 'any'), ('py36', 'none', 'any'), ('py35', 'none', 'any'), ('py34', 'none', 'any'), ('py33', 'none', 'any'), ('py32', 'none', 'any'), ('py31', 'none', 'any'), ('py30', 'none', 'any')]    
+>>> exit()
+pip3 install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.5.0rc1-cp37-cp37m-linux_x86_64.whl
+
