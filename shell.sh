@@ -93,6 +93,8 @@ firewall-cmd --zone= public --remove-port=80/tcp --permanent
 sed -i 's/hellohhhhh/hi/g' `grep -rl 'hellohhhhh' /opt`
 # 将shell.sh中/var/log 替换成/usr/local
 sed -i 's/\/var\/log/\/usr\/local/g' shell.sh
+# 替换网址，将需要下载的文件链接替换成本地文件链接，用于离线编译tensorflow
+sed -i 's/^http.*\//http:\/\/localhost\//g' `grep -rl 'urls\ =\ \[' ./`
 # awk
 awk 'BEGIN{for(i=1; i<=10; i++) print i}'
 # kill某个用户的所有进程
