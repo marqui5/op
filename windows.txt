@@ -118,3 +118,32 @@ explorer "http://MSGuides.com"&goto halt
 echo.&echo ======================================&echo Sorry! Your version is not supported.&echo Please try installing the latest version here: bit.ly/getmsps
 :halt
 pause
+
+Open command window here
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\cmdhere]
+@="@shell32.dll,-8506"
+"NoWorkingDirectory"=""
+"ShowBasedOnVelocityId"=dword:00639bc8
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\cmdhere\command]
+@="cmd.exe /s /k pushd \"%V\""
+
+; Run as Administrator
+[HKEY_CLASSES_ROOT\Directory\Background\shell\runas]
+@="Open command window here(Administrator)"
+"HasLUAShield"=""
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\runas\command]
+@="cmd.exe /s /k pushd \"%V\""
+
+; Open Powershell window here as Administrator
+[HKEY_CLASSES_ROOT\Directory\Background\shell\PowershellAdmin]
+"Extended"=""
+"HasLUAShield"=""
+@="Open Powershell window here(Administrator)"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\PowershellAdmin\command]
+@="powershell.exe -windowstyle hidden -Command $stpath = pwd; Start-Process PowerShell -ArgumentList \\\"-NoExit\\\", \\\"-Command Set-Location -literalPath '%V'\\\" -verb RunAs"
+
