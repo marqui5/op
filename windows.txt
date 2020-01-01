@@ -119,7 +119,7 @@ echo.&echo ======================================&echo Sorry! Your version is no
 :halt
 pause
 
-Open command window here
+cmdhere.reg
 Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\Directory\Background\shell\cmdhere]
