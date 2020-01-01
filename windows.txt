@@ -28,6 +28,20 @@ reset activate
 slmgr -rearm
 slmgr -ato
 
+KMS Server
+download：http://forums.mydigitallife.info/threads/50234-Emulated-KMS-Servers-on-non-Windows-platforms
+expression password：2016
+1.
+new vm, chose Linux3.x kernel, memory great than 16MB, processor 1, flopy disk, network: bridge
+2.run KMS
+use floppy144.vfd, power on dhcp ip:192.168.1.5
+Python KMS Server
+yum -y install git python-argparse
+cd /usr/local/
+git clone https://github.com/myanaloglife/py-kms.git
+cd /usr/local//py-kms
+python server.py 
+
 Windows 8.1 Professional key
 GCRJD-8NW9H-F2CDX-CCM8D-9D6T9
 
