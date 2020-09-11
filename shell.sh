@@ -121,8 +121,12 @@ ssh -p 9922 -fN -L 5901:localhost:5901 root@192.168.1.106
 ssh-keygen
 # 查看并复制公钥
 cat /root/.ssh/id_rsa.pub
-# 克隆远程仓库到本地
+# 克隆远程仓库到本地,先有远程库
 git clone git@github.com:coldly/Operations.git
+# 在当前目录新建一个Git代码库，先有本地库
+$ git init
+# 为刚刚新建的代码库添加远程仓库
+git remote add origin git@github.com:coldly/Operations.git
 # 添加修改后的文件
 git add shell.sh
 # 提交修改
@@ -138,16 +142,99 @@ git reflog
 # 解决冲突直接修改文件
 
 # git server
+# 创建无家目录的git用户指定git-shell
+useradd -M -s /usr/bin/git-shell git
+# 导入git用户的公钥文件
+vim /home/git/.ssh/authorized_keys
 # 创建git裸库
-git init --bare test.git
+su git
+git init --bare /git/test.git
 # 克隆裸库
-git clone ssh://192.168.1.106:9922/git/test.git
+git clone git@192.168.1.106:9922/git/test.git
 # 创建已有项目的备份裸库
 git init --bare project.git
 # 为已有的项目添加自建远程仓库
-git remote add gitserver ssh://192.168.1.106:9922/git/project.git
-# 提交代码到自建git服务器
-git push gitserver
+git remote add gitserver git@192.168.1.106:9922/git/project.git
+# 提交代码到自建远程仓库
+git push gitserver master
+
+# git http server
+# 创建http用户认证文件
+htpasswd - c /etc/httpd/conf.d/git.auth git
+# 编辑Apache虚拟主机配置文件
+vim /etc/httpd/conf.d/vhosts.conf
+<VirtualHost *:80>
+
+    ServerName git.com
+
+    ServerAdmin git@git.com
+
+    SetEnv GIT_PROJECT_ROOT /git
+
+    SetEnv GIT_HTTP_EXPORT_ALL
+
+    ScriptAlias / /usr/local/git/libexec/git-core/git-http-backend/
+
+    <Location />
+
+        AuthType Basic
+
+        AuthName "git"
+
+        AuthUserFile /etc/httpd/conf.d/git.auth
+
+        Require valid-user
+
+    </Location>
+
+</VirtualHost>
+# 使用http协议克隆代码
+git clone http://git.com/project.git
+
+# gitweb
+# 编辑Apache虚拟主机文件开通网页版git服务
+vim /etc/httpd/conf.d/vhosts.conf
+<VirtualHost *:81>
+
+    ServerName git.com
+
+    ServerAdmin git@git.com
+
+    <Location />
+
+        AuthType Basic
+
+        AuthName "git"
+
+        AuthUserFile /etc/httpd/conf.d/git.auth
+
+        Require valid-user
+
+    </Location>
+
+    DocumentRoot /var/www/gitweb
+
+    <Directory /var/www/gitweb>
+
+        Options +ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
+
+        AllowOverride All
+
+        order allow,deny
+
+        Allow from all
+
+        AddHandler cgi-script cgi
+
+        DirectoryIndex gitweb.cgi
+
+    </Directory>
+
+</VirtualHost>
+cp -rap /usr/local/git/share/gitweb/* /var/www/gitweb/
+vim /var/www/gitweb/gitweb.cgi
+our $projectroot = "/data/git";
+our $home_link_str = "Projects";
 
 # git command 
 # 一、新建代码库
