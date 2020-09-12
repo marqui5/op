@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 auto = os.popen('apt-get install')
 #print(auto.read())
