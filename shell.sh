@@ -1,5 +1,5 @@
-# 编写shell脚本循环创建100个用户（user_[0-99])
 #!/bin/bash
+ 编写shell脚本循环创建100个用户（user_[0-99])
 for((i = 0; i < 100; i++));
 do
 useradd user_$i;
@@ -107,6 +107,77 @@ ls | xargs ls
 crontab -l
 crontab -e
 vim /etc/crontab
+
+# securing the ssh daemon
+vim /etc/ssh/sshd_config
+# only accept SSHv2 protocol
+Protocol 2
+# disable or delay compression
+Compression no
+# Compression delayed
+# 3 is a good balance between security and convenience
+MaxAuthTries 3
+# deny root
+PermitRootLogin no
+# last log
+PrintLastLog yes
+# set timeout
+ClientAliveInterval 900
+ClientAliveCountMax 0
+# wihte list
+AllowUsers anon dba
+# black list
+DenyUsers root git oracle
+PermitEmptyPasswords no
+IgnoreRhosts yes
+IgnoreUserKnownHosts yes
+X11Forwarding no
+Port 9922
+# olny accept 10.0.0.5 conection
+ListenAddress 10.0.0.5
+# protect private key
+grep -i hostkey /etc/ssh/sshd_config
+ls -l /etc/ssh/*key
+chmod 0600 /etc/ssh/*key
+# protect public key
+ls -l /etc/ssh/*pub
+chmod 0644 /etc/ssh/*pub
+# 确保启用严格模式，StrictModes设置ssh在接收登录之前是否检查用户home目录和rhosts文件的权限和所有权，StrictModes为yes必需保证存放公钥的文件夹的拥有者与登陆用户名是相同的。
+StrictModes yes
+# 防止特权升级，SSH通过创建一个无特权的子进程来接收传入的连接，实现权限分离。用户身份验证后，SSH将使用该用户的权限创建另一个进程。
+UsePrivilegeSeparation sandbox
+# 启用密钥身份验证
+PubkeyAuthentication yes
+# 禁用 GSSAPI 认证
+GSSAPIAuthentication no
+# 禁用Kerberos认证
+KerberosAuthentication no
+# 禁用口令认证
+PasswordAuthentication no
+# 禁用密钥认证，如果你使用了其他身份认证方式，则可以禁用密钥身份认证。相比其他办法，使用密钥认证是风险较小的办法。
+# PubkeyAuthentication no
+# 使用符合FIPS 140-2标准的密码
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+# 使用符合FIPS 140-2标准的MAC，避免使用弱加密哈希算法
+MACs hmac-sha2-256,hmac-sha2-512
+# 使用iptables过滤SSH连接
+# 允许特定IP连接：
+iptables -I INPUT -p tcp -s <指定的IP> --dport 9922 -j ACCEPT
+# 允许特定的子网：
+iptables -I INPUT -p tcp -s <指定子网> --dport 9922 -j ACCEPT
+# 通过Firewalld过滤SSH连接
+# 允许特定IP连接SSH：
+firewall-cmd --permanent --zone=public --add-rich-rule=' rule family="ipv4"   source address="<指定IP>"   port protocol="tcp" port="9922" accept'
+# 允许特定子网：
+firewall-cmd --permanent --zone=public --add-rich-rule='   rule family="ipv4"   source address="<指定子网>"   port protocol="tcp" port="9922" accept'
+# 使用UFW(Uncomplicated Firewall)过滤SSH连接
+# 允许特定IP连接SSH：
+sudo ufw allow from <指定IP> to any port 9922
+# 允许特定子网：
+sudo ufw allow from <指定子网> to any port 9922
+# 启用自定义Banner，编辑/etc/issue文件，即可添加连接到SSH后的提示信息。
+Banner /etc/issue
+# use fail2ban
 
 # ssh端口转发
 # 动态端口转发：将本机1080端口数据动态转发给远程主机ssh端口9922，远程主机代理所有经过本机1080端口的网络连接,本机地址加1080端口变成一个socks代理，-D 动态转发，即socks代理，被转发的流量可以访问目标地址的任意端口，比如：http:80,https:443,ftp:21，-f 在后台对用户名密码进行认证，-N 仅仅只用来转发，不用再弹回一个新的shell，如果不加-N命令行界面将登录到远程主机。
