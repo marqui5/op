@@ -213,19 +213,27 @@ git reflog
 # 解决冲突直接修改文件
 
 # git server
-# 创建无家目录的git用户指定git-shell
-useradd -M -s /usr/bin/git-shell git
+# 创建git用户指定git-shell
+useradd -s /usr/bin/git-shell git
 # 导入git用户的公钥文件
+mkdir /home/git/.ssh
 vim /home/git/.ssh/authorized_keys
 # 创建git裸库
-su git
 git init --bare /git/test.git
+# Git仓库通常都以.git结尾。然后，把owner改为git
+chown -R git.git /git/test.git
+# 客户端编辑./ssh/config这个ssh多用户配置文件，把将要登录的远程git用户使用的默认端口指定为9922，git server 192.168.1.106这台远程主机命名为git.com，这样仓库地址就非常简化，由于git@192.168.1.106:9922/git/project.git这种写法还是会使用默认的ssh端口22，所以必须写成ssh://git@192.168.1.106:9922/git/project.git
+vim .ssh/config
+Host git.com
+HostName 192.168.1.106
+Port 9922
+User git
 # 克隆裸库
-git clone git@192.168.1.106:9922/git/test.git
-# 创建已有项目的备份裸库
+git clone git@git.com:/git/test.git
+# git server 上创建已有项目的备份裸库
 git init --bare project.git
 # 为已有的项目添加自建远程仓库
-git remote add gitserver git@192.168.1.106:9922/git/project.git
+git remote add gitserver git@git.com:/git/project.git
 # 提交代码到自建远程仓库
 git push gitserver master
 
