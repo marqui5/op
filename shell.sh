@@ -95,6 +95,8 @@ sed -i 's/hellohhhhh/hi/g' `grep -rl 'hellohhhhh' /opt`
 sed -i 's/\/var\/log/\/usr\/local/g' shell.sh
 # 替换网址，将需要下载的文件链接替换成本地文件链接，用于离线编译tensorflow
 sed -i 's/^http.*\//http:\/\/localhost\//g' `grep -rl 'urls\ =\ \[' ./`
+# sed替换所有换行符为vv
+sed -i ':a;N;s/\n/vv/g;ta' test.txt
 # awk
 awk 'BEGIN{for(i=1; i<=10; i++) print i}'
 # kill某个用户的所有进程
@@ -107,6 +109,14 @@ ls | xargs ls
 crontab -l
 crontab -e
 vim /etc/crontab
+# 批量改名脚本
+#!/bin/bash
+iter=0
+for file in `ls *.jpg`
+do
+mv $file $iter.jpg
+((iter++))
+done
 
 # securing the ssh daemon
 vim /etc/ssh/sshd_config
@@ -313,7 +323,7 @@ vim /etc/httpd/conf.d/vhosts.conf
 cp -rap /usr/local/git/share/gitweb/* /var/www/gitweb/
 vim /var/www/gitweb/gitweb.cgi
 our $projectroot = "/data/git";
-our $home_link_str = "Projects";
+our $home_link_str = "projects";
 
 # git command 
 # 一、新建代码库
