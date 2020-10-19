@@ -105,6 +105,8 @@ killall -u user
 pgrep -u user | xargs kill -9
 # xargs用法，将管道符前命令的所有结果依次作为xargs后命令的参数
 ls | xargs ls
+# ffmpeg 批量生成视频封面
+ls *.mp4 | sed 's/mp4//g' | xargs -i ffmpeg -ss 0:10 -i {}mp4 -f image2 {}jpg
 # 计划任务：分 时 日 月 周
 crontab -l
 crontab -e
