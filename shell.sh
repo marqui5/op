@@ -119,6 +119,12 @@ do
 mv $file $iter.jpg
 ((iter++))
 done
+# 查看当前模式
+systemctl get-default
+# 设置图形界面模式
+systemctl set-default graphical.target
+# 设置命令行模式
+systemctl set-default multi-user.target
 
 # securing the ssh daemon
 vim /etc/ssh/sshd_config
